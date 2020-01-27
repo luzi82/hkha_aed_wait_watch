@@ -1,7 +1,34 @@
+# google cloud stuff
+
+- https://console.cloud.google.com
+- Create project
+- Enable project billing
+- Enable Google Cloud Scheduler API
+- Enable Google Pub/Sub API
+- Enable Google Cloud Deployment Manager
+- Enable Google Cloud Functions
+- Enable Google Cloud Storage
+- Enable Google Drive API
+- Enable Stackdriver Logging
+- https://console.cloud.google.com/iam-admin/serviceaccounts/create?project=(project code)
+
 # env
 
-AWS_REGION=us-west-2
 MY_PATH=${PWD}
+GCP_PROJECT_ID=hkha-aed-wait-watch
+GCP_REGION=us-central
+
+# init
+
+gcloud config set project ${GCP_PROJECT_ID}
+gcloud app create --region=${GCP_REGION}
+gcloud pubsub topics create pull-schedule-topic
+gcloud pubsub subscriptions create pull-schedule-sub --topic pull-schedule-topic
+gcloud scheduler jobs create pubsub pull-schedule-job \
+  --schedule="2,17,32,47 * * * *" \
+  --topic="pull-schedule-topic" \
+  --message-body="dummy" \
+  --time-zone="Asia/Hong_Kong"
 
 # init
 
@@ -18,16 +45,16 @@ pip install --upgrade pip
 pip install awscli
 aws configure
 
-npm install serverless
+npm install
 SERVERLESS=${MY_PATH}/node_modules/serverless/bin/serverless
 ${SERVERLESS} --version
 
 # deploy
 
 cd ${MY_PATH}/src
-${SERVERLESS} deploy -r ${AWS_REGION}
+${SERVERLESS} deploy
 
 # un-deploy
 
 cd ${MY_PATH}/src
-${SERVERLESS} remove -r ${AWS_REGION}
+${SERVERLESS} remove

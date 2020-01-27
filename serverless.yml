@@ -1,0 +1,30 @@
+service: hkha-aed-wait-watch
+
+frameworkVersion: ">=1.61.0 <2.0.0"
+
+provider:
+  name: google
+  runtime: python37
+  region: us-central1
+  project: hkha-aed-wait-watch
+  credentials: ~/project/hkha_aed_wait_watch/key/hkha-aed-wait-watch-358216f13586.json
+
+plugins:
+  - serverless-google-cloudfunctions
+
+package:
+  exclude:
+    - ./**
+    - '!node_modules/**'
+  include:
+    - main.py
+    - package.json
+    - requirements.txt
+
+functions:
+  cron:
+    handler: handle_gcp
+    events:
+      - event:
+          eventType: providers/cloud.pubsub/eventTypes/topic.publish
+          resource: 'projects/${self:provider.project, ""}/topics/pull-schedule-topic'

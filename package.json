@@ -1,0 +1,15 @@
+{
+  "name": "hkha_aed_wait_watch",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.py",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "serverless.com",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless-google-cloudfunctions": "*",
+    "serverless": "*"
+  }
+}

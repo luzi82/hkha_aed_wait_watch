@@ -1,2 +1,6 @@
 /.project
+/.serverless/
+/node_modules/
+/test.sh
+/venv-deploy/
 /venv-dev/
