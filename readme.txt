@@ -9,6 +9,7 @@
 - Enable Google Cloud Functions
 - Enable Google Cloud Storage
 - Enable Google Drive API
+- Enable Google Sheet API
 - Enable Stackdriver Logging
 - https://console.cloud.google.com/iam-admin/serviceaccounts/create?project=(project code)
 
@@ -18,7 +19,7 @@ MY_PATH=${PWD}
 GCP_PROJECT_ID=hkha-aed-wait-watch
 GCP_REGION=us-central
 
-# init
+# init gcloud
 
 gcloud config set project ${GCP_PROJECT_ID}
 gcloud app create --region=${GCP_REGION}
@@ -30,7 +31,7 @@ gcloud scheduler jobs create pubsub pull-schedule-job \
   --message-body="dummy" \
   --time-zone="Asia/Hong_Kong"
 
-# init
+# init dev
 
 python3 -m venv venv-dev
 . venv-dev/bin/activate
@@ -51,10 +52,8 @@ ${SERVERLESS} --version
 
 # deploy
 
-cd ${MY_PATH}/src
 ${SERVERLESS} deploy
 
 # un-deploy
 
-cd ${MY_PATH}/src
 ${SERVERLESS} remove
