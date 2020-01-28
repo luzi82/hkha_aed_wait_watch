@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 AEDWT_DATA_URL = 'https://www.ha.org.hk/aedwt/data/aedWtData.json'
 
-FOLDER_ID='1n19qu8x15mMHMUr06sDOJt3C4jSz_M_D'
+FOLDER_ID='1XG6uLgMj71Ji0KBn3gx_t0_0TdhM4HB-'
 SCOPES = [
     'https://www.googleapis.com/auth/drive.metadata',
     'https://www.googleapis.com/auth/drive'
