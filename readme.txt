@@ -31,6 +31,10 @@ gcloud scheduler jobs create pubsub pull-schedule-job \
   --message-body="dummy" \
   --time-zone="Asia/Hong_Kong"
 
+Create folder in Google Drive
+Share google drive folder write permission to Google Cloud Project Service Account
+Fill the folder ID to main.py FOLDER_ID
+
 # init dev
 
 python3 -m venv venv-dev

@@ -34,6 +34,7 @@ def run(creds=None, **kkargs):
     logger.info('GOAXBRLI ' + AEDWT_DATA_URL + ' '+str(aedwt_data))
     aedwt_data = json.loads(aedwt_data)
     
+    # create yyyy folder
     yyyy = current_datetime.strftime('%Y')
     q = "'{FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and name = '{yyyy}'".format(FOLDER_ID=FOLDER_ID, yyyy=yyyy)
     results = drive_service.files().list(q=q, fields='files(id,createdTime)').execute()
@@ -59,6 +60,7 @@ def run(creds=None, **kkargs):
         yyyy_file_id = file_list[0]['id']
     logger.info("PCMNVWKI YYYY folder ID: "+yyyy_file_id)
 
+    # create yyyymm file
     yyyymm = current_datetime.strftime('%Y-%m')
     q = "'{yyyy_file_id}' in parents and mimeType = 'application/vnd.google-apps.spreadsheet' and name = '{yyyymm}'".format(yyyy_file_id=yyyy_file_id, yyyymm=yyyymm)
     results = drive_service.files().list(q=q, fields='files(id,createdTime)').execute()
@@ -84,6 +86,7 @@ def run(creds=None, **kkargs):
         yyyymm_file_id = file_list[0]['id']
     logger.info("XFPBSLOQ YYYYMM file ID: "+yyyymm_file_id)
 
+    # create yyyymmdd sheet
     yyyymmdd = current_datetime.strftime('%Y-%m-%d')
     sheet_metadata = sheets_service.spreadsheets().get(spreadsheetId=yyyymm_file_id).execute()
     logger.debug('TRGHFXUU sheet_metadata={sheet_metadata}'.format(sheet_metadata=str(sheet_metadata)))
@@ -93,9 +96,15 @@ def run(creds=None, **kkargs):
     logger.debug('MJTNDUOA sheet_list={sheet_list}'.format(sheet_list=str(sheet_list)))
     if len(sheet_list) <= 0:
         logger.info('CRSUXGYB Create YYYYMMDD sheet')
-        request = {'requests':[
-            {'addSheet':{'properties':{'title': yyyymmdd}}}
-        ]}
+        request = {'requests':[{'addSheet':{'properties':{
+            'title': yyyymmdd,
+            'gridProperties': {
+                'rowCount': 3,
+                'columnCount': 3,
+                'frozenRowCount': 2,
+                'frozenColumnCount': 2,
+            }
+        }}}]}
         result = sheets_service.spreadsheets().batchUpdate(spreadsheetId=yyyymm_file_id, body=request).execute()
         #print(str(result))
         yyyymmdd_sheet_id = result['replies'][0]['addSheet']['properties']['sheetId']
@@ -109,42 +118,47 @@ def run(creds=None, **kkargs):
         yyyymmdd_sheet_id = sheet_list[0]['properties']['sheetId']
     logger.info("IVLCJRGF YYYYMMDD sheet ID: {yyyymmdd_sheet_id}".format(yyyymmdd_sheet_id=yyyymmdd_sheet_id))
 
+    # manage sheet header
     hosp_data_list = aedwt_data['result']['hospData']
-    hosp_code_list = map(lambda i:i['hospCode'], hosp_data_list)
-    hosp_code_list = sorted(hosp_code_list)
+    hosp_data_list = sorted(hosp_data_list, key=lambda i:i['hospCode'])
 
     result = sheets_service.spreadsheets().values().get(
             spreadsheetId=yyyymm_file_id,
-            range='{yyyymmdd}!A1:ZZZ1'.format(yyyymmdd=yyyymmdd)
+            range='{yyyymmdd}!A1:ZZZ2'.format(yyyymmdd=yyyymmdd)
         ).execute()
     logger.debug('RBVZQSML '+str(result))
 
     if 'values' not in result:
-        head_value_list = []
+        head_value_list_list = [[],[]]
     else:
-        head_value_list = result['values'][0]
-    head_value_list_dirty = False
-    def check_append_head_value_list(v):
-        nonlocal head_value_list_dirty, head_value_list
-        if v in head_value_list: return
-        head_value_list_dirty = True
-        head_value_list.append(v)
+        head_value_list_list = result['values']
+    while len(head_value_list_list[0])<len(head_value_list_list[1]):
+        head_value_list_list[0].append('')
+    while len(head_value_list_list[1])<len(head_value_list_list[0]):
+        head_value_list_list[1].append('')
+    head_value_list_list_dirty = False
+    def check_append_head_value_list_list(k,name):
+        nonlocal head_value_list_list_dirty, head_value_list_list
+        if k in head_value_list_list[1]: return
+        head_value_list_list_dirty = True
+        head_value_list_list[1].append(k)
+        head_value_list_list[0].append(name)
     
-    check_append_head_value_list('pull_datetime')
-    check_append_head_value_list('timeEn')
-    for hosp_code in hosp_code_list:
-        check_append_head_value_list('{}_topWait'.format(hosp_code))
-    for hosp_code in hosp_code_list:
-        check_append_head_value_list('{}_hospTime'.format(hosp_code))
-    logger.debug('FPHKXTOJ head_value_list_dirty={head_value_list_dirty} head_value_list={head_value_list}'.format(
-            head_value_list_dirty=head_value_list_dirty,
-            head_value_list=head_value_list,
+    check_append_head_value_list_list('pull_datetime','')
+    check_append_head_value_list_list('timeEn','')
+    for hosp_data in hosp_data_list:
+        check_append_head_value_list_list('{}.topWait'.format(hosp_data['hospCode']),hosp_data['hospNameB5'])
+    for hosp_data in hosp_data_list:
+        check_append_head_value_list_list('{}.hospTime'.format(hosp_data['hospCode']),hosp_data['hospNameB5'])
+    logger.debug('FPHKXTOJ head_value_list_list_dirty={head_value_list_list_dirty} head_value_list_list={head_value_list_list}'.format(
+            head_value_list_list_dirty=head_value_list_list_dirty,
+            head_value_list_list=head_value_list_list,
         ))
 
-    if head_value_list_dirty:
+    if head_value_list_list_dirty:
         body = {
-            'range': '{yyyymmdd}!A1:ZZZ1'.format(yyyymmdd=yyyymmdd),
-            'values': [head_value_list],
+            'range': '{yyyymmdd}!A1:ZZZ2'.format(yyyymmdd=yyyymmdd),
+            'values': head_value_list_list,
         }
         result = sheets_service.spreadsheets().values().update(
                 spreadsheetId=yyyymm_file_id,
@@ -154,10 +168,13 @@ def run(creds=None, **kkargs):
             ).execute()
         logger.debug('WFOQUEYY '+str(result))
 
+    head_value_list = head_value_list_list[1]
+
     head_to_index_dict = {}
     for i in range(len(head_value_list)):
         head_to_index_dict[head_value_list[i]] = i
 
+    # put topWait data
     value_list = [None]*len(head_value_list)
     value_list[head_to_index_dict['pull_datetime']] = current_datetime.isoformat()
     value_list[head_to_index_dict['timeEn']] = aedwt_data['result']['timeEn']
@@ -165,14 +182,14 @@ def run(creds=None, **kkargs):
         hospCode = hosp_data['hospCode']
         hospTime = hosp_data['hospTime']
         topWait  = hosp_data['topWait']
-        k = '{}_hospTime'.format(hospCode)
+        k = '{}.hospTime'.format(hospCode)
         value_list[head_to_index_dict[k]] = hospTime
-        k = '{}_topWait'.format(hospCode)
+        k = '{}.topWait'.format(hospCode)
         value_list[head_to_index_dict[k]] = topWait
     logger.debug('IDKHFOYC value_list={value_list}'.format(value_list=value_list))
 
     body = {
-        'range': '{yyyymmdd}!A1:ZZZ999999'.format(yyyymmdd=yyyymmdd),
+        'range': '{yyyymmdd}!A3:ZZZ999999'.format(yyyymmdd=yyyymmdd),
         'values': [value_list],
     }
     result = sheets_service.spreadsheets().values().append(
@@ -182,6 +199,17 @@ def run(creds=None, **kkargs):
             valueInputOption='RAW',
         ).execute()
     logger.debug('HRCFUXTP '+str(result))
+
+    # del Sheet1
+    sheet_list = sheet_metadata['sheets']
+    sheet_list = filter(lambda i:i['properties']['title']=='Sheet1', sheet_list)
+    sheet_list = list(sheet_list)
+    logger.debug('WMVKPINC sheet_list={sheet_list}'.format(sheet_list=str(sheet_list)))
+    for sheet in sheet_list:
+        sheet_id = sheet_list[0]['properties']['sheetId']
+        body = {'requests':[{'deleteSheet':{'sheetId':sheet_id}}]}
+        result = sheets_service.spreadsheets().batchUpdate(spreadsheetId=yyyymm_file_id, body=body).execute()
+        logger.debug('IMDDXKPU '+str(result))
 
 def handle_gcp(event, context):
     run()
