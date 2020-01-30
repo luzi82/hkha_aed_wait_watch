@@ -232,6 +232,29 @@ def run(creds=None, folder_id=FOLDER_ID, timeen_history_path=TIMEEN_HISTORY_PATH
         logger.info('ZJFEZQLN update timeen_history')
         futsu.storage.bytes_to_path(timeen_history_path, aedwt_data['result']['timeEn'].encode('UTF8'))
 
+    # sort sheet
+    sheet_metadata = sheets_service.spreadsheets().get(spreadsheetId=yyyymm_file_id).execute()
+    logger.debug('HOTHGEJU sheet_metadata={sheet_metadata}'.format(sheet_metadata=str(sheet_metadata)))
+    sheet_list = sheet_metadata['sheets']
+    sheet_list = sorted(sheet_list, key=lambda i:i['properties']['title'], reverse=True)
+    sheet_list = map(
+        lambda i: \
+        { 'updateSheetProperties' : {
+            'properties':{ 'sheetId': i['properties']['sheetId'] },
+            'fields':'index',
+        }},
+        sheet_list
+    )
+    sheet_list = list(sheet_list)
+    for i in range(len(sheet_list)):
+        sheet = sheet_list[i]
+        sheet['updateSheetProperties']['properties']['index'] = i
+    logger.debug('TZDLTBSJ sheet_list={sheet_list}'.format(sheet_list=sheet_list))
+
+    body = {'requests':sheet_list}
+    result = sheets_service.spreadsheets().batchUpdate(spreadsheetId=yyyymm_file_id, body=body).execute()
+    logger.debug('ZTDPYKYB result={result}'.format(result=result))
+
 def handle_gcp(event, context):
     run()
 
