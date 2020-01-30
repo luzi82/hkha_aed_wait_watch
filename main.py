@@ -41,7 +41,8 @@ def run(creds=None, folder_id=FOLDER_ID, timeen_history_path=TIMEEN_HISTORY_PATH
         timeen_history = futsu.storage.path_to_bytes(timeen_history_path)
         timeen_history = timeen_history.decode('UTF8')
     except:
-        pass
+        logger.warning('YKPEGCEN timeen_history get ERROR')
+        timeen_history = None
     logger.debug('PVDTSKMM timeen_history={timeen_history}'.format(timeen_history=timeen_history))
     
     if timeen_history == aedwt_data['result']['timeEn']:
