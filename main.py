@@ -13,13 +13,14 @@ logger = logging.getLogger(__name__)
 AEDWT_DATA_URL = 'https://www.ha.org.hk/aedwt/data/aedWtData.json'
 
 FOLDER_ID='1XG6uLgMj71Ji0KBn3gx_t0_0TdhM4HB-'
+TIMEEN_HISTORY_PATH='gs://main_kqdqaldw/production/timeen_history'
 SCOPES = [
     'https://www.googleapis.com/auth/drive.metadata',
     'https://www.googleapis.com/auth/drive'
 ]
 TZ = 'Asia/Hong_Kong'
 
-def run(creds=None, folder_id=FOLDER_ID, **kkargs):
+def run(creds=None, folder_id=FOLDER_ID, timeen_history_path=TIMEEN_HISTORY_PATH, **kkargs):
     current_datetime = datetime.datetime.now().astimezone(pytz.timezone(TZ))
     logger.info("XQSSAXHH Run at " + str(current_datetime))
 
@@ -33,6 +34,19 @@ def run(creds=None, folder_id=FOLDER_ID, **kkargs):
     aedwt_data = futsu.storage.path_to_bytes(AEDWT_DATA_URL)
     logger.info('GOAXBRLI ' + AEDWT_DATA_URL + ' '+str(aedwt_data))
     aedwt_data = json.loads(aedwt_data)
+
+    # check timeen_history
+    timeen_history = None
+    try:
+        timeen_history = futsu.storage.path_to_bytes(timeen_history_path)
+        timeen_history = timeen_history.decode('UTF8')
+    except:
+        pass
+    logger.debug('PVDTSKMM timeen_history={timeen_history}'.format(timeen_history=timeen_history))
+    
+    if timeen_history == aedwt_data['result']['timeEn']:
+        logger.warning('OFBGIJSS timeen_history == aedwt_data.result.timeEn, EXIT')
+        return
     
     # create yyyy folder
     yyyy = current_datetime.strftime('%Y')
@@ -211,6 +225,10 @@ def run(creds=None, folder_id=FOLDER_ID, **kkargs):
         result = sheets_service.spreadsheets().batchUpdate(spreadsheetId=yyyymm_file_id, body=body).execute()
         logger.debug('IMDDXKPU '+str(result))
 
+    # write timeEn
+    logger.info('ZJFEZQLN update timeen_history')
+    futsu.storage.bytes_to_path(timeen_history_path, aedwt_data['result']['timeEn'].encode('UTF8'))
+
 def handle_gcp(event, context):
     run()
 
@@ -228,6 +246,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--creds")
     parser.add_argument("--folder_id")
+    parser.add_argument("--timeen_history_path")
     args = parser.parse_args()
     
     run(**(args.__dict__))

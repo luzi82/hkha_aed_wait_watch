@@ -12,6 +12,12 @@
 - Enable Google Sheet API
 - Enable Stackdriver Logging
 - https://console.cloud.google.com/iam-admin/serviceaccounts/create?project=(project code)
+- Google Cloud Storage, create bucket [CAWZODLX]
+
+# mod code
+
+main.py
+- FOLDER_ID
 
 # env
 
