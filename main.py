@@ -19,7 +19,7 @@ SCOPES = [
 ]
 TZ = 'Asia/Hong_Kong'
 
-def run(creds=None, **kkargs):
+def run(creds=None, folder_id=FOLDER_ID, **kkargs):
     current_datetime = datetime.datetime.now().astimezone(pytz.timezone(TZ))
     logger.info("XQSSAXHH Run at " + str(current_datetime))
 
@@ -36,7 +36,7 @@ def run(creds=None, **kkargs):
     
     # create yyyy folder
     yyyy = current_datetime.strftime('%Y')
-    q = "'{FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder' and name = '{yyyy}'".format(FOLDER_ID=FOLDER_ID, yyyy=yyyy)
+    q = "'{folder_id}' in parents and mimeType = 'application/vnd.google-apps.folder' and name = '{yyyy}'".format(folder_id=folder_id, yyyy=yyyy)
     results = drive_service.files().list(q=q, fields='files(id,createdTime)').execute()
     logger.info("BKTMZHMJ YYYY folder search result: " + str(results))
     if len(results['files']) <= 0:
@@ -44,7 +44,7 @@ def run(creds=None, **kkargs):
         file_metadata = {
             'name': yyyy,
             'mimeType': 'application/vnd.google-apps.folder',
-            'parents': [FOLDER_ID],
+            'parents': [folder_id],
         }
         file = drive_service.files().create(body=file_metadata, fields='id').execute()
         logger.debug("VSMIVLFG "+str(file))
@@ -227,6 +227,7 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--creds")
+    parser.add_argument("--folder_id")
     args = parser.parse_args()
     
     run(**(args.__dict__))
