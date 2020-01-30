@@ -37,12 +37,13 @@ def run(creds=None, folder_id=FOLDER_ID, timeen_history_path=TIMEEN_HISTORY_PATH
 
     # check timeen_history
     timeen_history = None
-    try:
-        timeen_history = futsu.storage.path_to_bytes(timeen_history_path)
-        timeen_history = timeen_history.decode('UTF8')
-    except:
-        logger.warning('YKPEGCEN timeen_history get ERROR')
-        timeen_history = None
+    if timeen_history_path != '':
+        try:
+            timeen_history = futsu.storage.path_to_bytes(timeen_history_path)
+            timeen_history = timeen_history.decode('UTF8')
+        except:
+            logger.warning('YKPEGCEN timeen_history get ERROR')
+            timeen_history = None
     logger.debug('PVDTSKMM timeen_history={timeen_history}'.format(timeen_history=timeen_history))
     
     if timeen_history == aedwt_data['result']['timeEn']:
@@ -227,8 +228,9 @@ def run(creds=None, folder_id=FOLDER_ID, timeen_history_path=TIMEEN_HISTORY_PATH
         logger.debug('IMDDXKPU '+str(result))
 
     # write timeEn
-    logger.info('ZJFEZQLN update timeen_history')
-    futsu.storage.bytes_to_path(timeen_history_path, aedwt_data['result']['timeEn'].encode('UTF8'))
+    if timeen_history_path != '':
+        logger.info('ZJFEZQLN update timeen_history')
+        futsu.storage.bytes_to_path(timeen_history_path, aedwt_data['result']['timeEn'].encode('UTF8'))
 
 def handle_gcp(event, context):
     run()
