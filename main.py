@@ -10,15 +10,16 @@ import pytz
 
 logger = logging.getLogger(__name__)
 
-AEDWT_DATA_URL = 'https://www.ha.org.hk/aedwt/data/aedWtData.json'
-
+# mod me for your own good
 FOLDER_ID='1XG6uLgMj71Ji0KBn3gx_t0_0TdhM4HB-'
 TIMEEN_HISTORY_PATH='gs://main_kqdqaldw/production/timeen_history'
+TZ = 'Asia/Hong_Kong'
+
+AEDWT_DATA_URL = 'https://www.ha.org.hk/aedwt/data/aedWtData.json'
 SCOPES = [
     'https://www.googleapis.com/auth/drive.metadata',
     'https://www.googleapis.com/auth/drive'
 ]
-TZ = 'Asia/Hong_Kong'
 
 def run(creds=None, folder_id=FOLDER_ID, timeen_history_path=TIMEEN_HISTORY_PATH, **kkargs):
     current_datetime = datetime.datetime.now().astimezone(pytz.timezone(TZ))

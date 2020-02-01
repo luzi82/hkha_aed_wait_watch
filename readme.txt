@@ -18,6 +18,8 @@
 
 main.py
 - FOLDER_ID
+- TIMEEN_HISTORY_PATH
+- TZ
 
 # env
 
@@ -47,6 +49,16 @@ python3 -m venv venv-dev
 . venv-dev/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+
+# dev test run
+
+export GOOGLE_APPLICATION_CREDENTIALS=[service account cred file path]
+GOOGLE_DRIVE_ROOT_FOLDER_ID=xxx
+
+python3 main.py \
+    --creds "${GOOGLE_APPLICATION_CREDENTIALS}" \
+    --folder_id "${GOOGLE_DRIVE_ROOT_FOLDER_ID}" \
+    --timeen_history_path ""
 
 # init deploy
 
