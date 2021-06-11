@@ -69,7 +69,7 @@ pip install awscli
 aws configure
 
 npm install
-SERVERLESS=${MY_PATH}/node_modules/serverless/bin/serverless
+SERVERLESS=${MY_PATH}/node_modules/.bin/serverless
 ${SERVERLESS} --version
 
 # deploy

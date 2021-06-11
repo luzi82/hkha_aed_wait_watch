@@ -1,6 +1,6 @@
 service: hkha-aed-wait-watch
 
-frameworkVersion: ">=1.61.0 <2.0.0"
+frameworkVersion: ">=2.45.2 <3.0.0"
 
 provider:
   name: google
